@@ -87,12 +87,12 @@ def main():
 
     query_parser = sub.add_parser("query", help="Search the index")
     query_parser.add_argument("query", help="Search query text")
-    query_parser.add_argument("--threshold", type=float, default=None,
+    query_parser.add_argument("-t", "--threshold", type=float, default=None,
                               help=f"Cosine distance threshold (default: {SCORE_THRESHOLD})")
 
     prompt_parser = sub.add_parser("prompt", help="Generate a complete RAG prompt for an LLM")
     prompt_parser.add_argument("query", help="Search query text")
-    prompt_parser.add_argument("--threshold", type=float, default=None,
+    prompt_parser.add_argument("-t", "--threshold", type=float, default=None,
                                help=f"Cosine distance threshold (default: {SCORE_THRESHOLD})")
 
     args = parser.parse_args()
