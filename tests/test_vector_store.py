@@ -1,7 +1,7 @@
 import pytest
 
 from embedder import Embedder
-from vector_store import VectorStore
+from vector_store import VectorStore, _split_qa
 
 
 @pytest.fixture
@@ -65,3 +65,37 @@ class TestVectorStore:
 
         store2 = VectorStore(chroma_tmp_dir, "persist_test", embedder)
         assert store2.count == 3
+
+
+class TestSplitQA:
+    def test_qa_pair(self):
+        q, a = _split_qa("问: 你好吗\n答: 我很好")
+        assert q == "问: 你好吗"
+        assert a == "答: 我很好"
+
+    def test_non_qa(self):
+        q, a = _split_qa("普通段落文字")
+        assert q == "普通段落文字"
+        assert a is None
+
+    def test_qa_chinese_colon(self):
+        q, a = _split_qa("问：你好吗\n答：我很好")
+        assert q == "问：你好吗"
+        assert a == "答：我很好"
+
+    def test_qa_english(self):
+        q, a = _split_qa("Q: hello\nA: world")
+        assert q == "Q: hello"
+        assert a == "A: world"
+
+    def test_qa_no_answer_stays_intact(self):
+        q, a = _split_qa("问: 只有问题")
+        assert q == "问: 只有问题"
+        assert a is None
+
+    def test_qa_stores_answer_in_metadata(self, local_store):
+        chunks = [("faq.txt", ".txt", "问: 问题\n答: 答案", 0)]
+        local_store.add_documents(chunks)
+        results = local_store.search("问题", top_k=5)
+        assert len(results) > 0
+        assert results[0]["metadata"].get("answer") == "答: 答案"

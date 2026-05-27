@@ -8,6 +8,14 @@ from chromadb.config import Settings
 from embedder import Embedder
 
 
+def _split_qa(text: str) -> tuple[str, str | None]:
+    for sep in ("\n答:", "\n答：", "\nA:", "\nA："):
+        if sep in text:
+            q, a = text.split(sep, maxsplit=1)
+            return (q.strip(), (sep[1:] + a).strip())
+    return (text, None)
+
+
 class VectorStore:
     def __init__(self, persist_dir: str | Path, collection_name: str, embedder: Embedder):
         self.embedder = embedder
@@ -27,11 +35,17 @@ class VectorStore:
         if not chunks:
             return
 
-        texts = [c[2] for c in chunks]
-        ids = [f"{c[0]}::chunk::{c[3]}" for c in chunks]
-        metadatas = [
-            {"filename": c[0], "ext": c[1], "chunk_index": c[3]} for c in chunks
-        ]
+        texts = []
+        ids = []
+        metadatas = []
+        for c in chunks:
+            question, answer = _split_qa(c[2])
+            texts.append(question)
+            ids.append(f"{c[0]}::chunk::{c[3]}")
+            meta = {"filename": c[0], "ext": c[1], "chunk_index": c[3]}
+            if answer:
+                meta["answer"] = answer
+            metadatas.append(meta)
         embeddings = self.embedder.embed(texts)
 
         self.collection.add(

@@ -74,7 +74,10 @@ def cmd_prompt(query: str, threshold: float | None = None):
     print("参考资料：")
     for i, item in enumerate(items, 1):
         print(f"[{i}] ({item.filename}) score={item.score:.4f}")
-        print(item.content)
+        if item.answer:
+            print(f"{item.content}\n{item.answer}")
+        else:
+            print(item.content)
         print()
     print("用户问题：" + query)
 

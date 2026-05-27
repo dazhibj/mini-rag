@@ -33,6 +33,18 @@ class TestFormatResults:
         assert len(results) == 3
         assert results[0].score < results[1].score
 
+    def test_answer_field(self):
+        raw = [
+            {
+                "id": "faq.txt::chunk::0",
+                "document": "问: 你好吗",
+                "metadata": {"filename": "faq.txt", "ext": ".txt", "chunk_index": 0, "answer": "答: 我很好"},
+                "distance": 0.3,
+            }
+        ]
+        results = format_results(raw)
+        assert results[0].answer == "答: 我很好"
+
 
 class TestPrintResults:
     def test_empty(self, capsys):
@@ -48,3 +60,12 @@ class TestPrintResults:
         captured = capsys.readouterr()
         assert "a.txt" in captured.out
         assert "hello" in captured.out
+
+    def test_with_answer(self, capsys):
+        results = [
+            SearchResult(id="faq::0", content="问: 问题", filename="faq.txt", chunk_index=0, score=0.2, answer="答: 答案")
+        ]
+        print_results(results)
+        captured = capsys.readouterr()
+        assert "问: 问题" in captured.out
+        assert "答: 答案" in captured.out
