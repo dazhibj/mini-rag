@@ -63,3 +63,10 @@ class TestLoadDocuments:
         assert ".txt" in SUPPORTED_EXTS
         assert ".md" in SUPPORTED_EXTS
         assert ".xlsx" in SUPPORTED_EXTS
+
+    def test_skip_directories(self, tmp_path: Path):
+        (tmp_path / "subdir").mkdir()
+        (tmp_path / "subdir" / "note.txt").write_text("hello")
+        results = list(load_documents(tmp_path))
+        assert len(results) == 1
+        assert "subdir" in results[0][0]
