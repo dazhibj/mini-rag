@@ -53,15 +53,17 @@ def cmd_index():
     print(f"Done. Total vectors: {store.count}")
 
 
-def cmd_query(query: str):
+def cmd_query(query: str, threshold: float | None = None):
     store = _get_store()
-    results = store.search(query, top_k=TOP_K, threshold=SCORE_THRESHOLD)
+    th = threshold if threshold is not None else SCORE_THRESHOLD
+    results = store.search(query, top_k=TOP_K, threshold=th)
     print_results(format_results(results), max_chars=DISPLAY_MAX_CHARS)
 
 
-def cmd_prompt(query: str):
+def cmd_prompt(query: str, threshold: float | None = None):
     store = _get_store()
-    results = store.search(query, top_k=TOP_K, threshold=SCORE_THRESHOLD)
+    th = threshold if threshold is not None else SCORE_THRESHOLD
+    results = store.search(query, top_k=TOP_K, threshold=th)
     items = format_results(results)
 
     if not items:
@@ -85,18 +87,22 @@ def main():
 
     query_parser = sub.add_parser("query", help="Search the index")
     query_parser.add_argument("query", help="Search query text")
+    query_parser.add_argument("--threshold", type=float, default=None,
+                              help=f"Cosine distance threshold (default: {SCORE_THRESHOLD})")
 
     prompt_parser = sub.add_parser("prompt", help="Generate a complete RAG prompt for an LLM")
     prompt_parser.add_argument("query", help="Search query text")
+    prompt_parser.add_argument("--threshold", type=float, default=None,
+                               help=f"Cosine distance threshold (default: {SCORE_THRESHOLD})")
 
     args = parser.parse_args()
 
     if args.command == "index":
         cmd_index()
     elif args.command == "query":
-        cmd_query(args.query)
+        cmd_query(args.query, threshold=args.threshold)
     elif args.command == "prompt":
-        cmd_prompt(args.query)
+        cmd_prompt(args.query, threshold=args.threshold)
 
 
 if __name__ == "__main__":
