@@ -22,16 +22,18 @@ python main.py prompt "你的问题"
 
 ### `index` — build the vector index
 
-Scans `knowledge_base/`, chunks documents, and stores embeddings in ChromaDB.
+Scans the knowledge directory, chunks documents, and stores embeddings in ChromaDB.
 
 ```bash
-python main.py index
+python main.py index                         # uses knowledge_base/
+KNOWLEDGE_DIR=/path/to/docs python main.py index  # custom directory
 ```
 
 ### `query` — search the index
 
 ```bash
 python main.py query "退款政策是什么"
+python main.py query "退款政策是什么" --threshold 0.4
 ```
 
 ### `prompt` — generate a complete RAG prompt
@@ -40,6 +42,7 @@ Outputs a ready-to-use prompt with retrieved context + user question. Designed f
 
 ```bash
 python main.py prompt "退款政策是什么"
+python main.py prompt "退款政策是什么" --threshold 0.35  # stricter filter
 ```
 
 **Agent integration:**
@@ -47,14 +50,21 @@ python main.py prompt "退款政策是什么"
 ```python
 import subprocess
 
-def rag_query(question: str) -> str:
+def rag_query(question: str, threshold: float | None = None,
+              knowledge_dir: str | None = None) -> str:
+    cmd = ["python", "main.py", "prompt", question]
+    if threshold is not None:
+        cmd += ["--threshold", str(threshold)]
+    env = {}
+    if knowledge_dir:
+        env["KNOWLEDGE_DIR"] = knowledge_dir
     result = subprocess.run(
-        ["python", "main.py", "prompt", question],
-        capture_output=True, text=True, cwd="/path/to/project"
+        cmd, capture_output=True, text=True, cwd="/path/to/project",
+        env=env or None,
     )
     return result.stdout  # complete prompt with context
 
-prompt = rag_query("客户如何退货")
+prompt = rag_query("客户如何退货", threshold=0.4)
 llm_response = your_llm.chat(prompt)
 ```
 
@@ -68,7 +78,9 @@ Edit `config.py`:
 | `HF_ENDPOINT` | `https://hf-mirror.com` | HuggingFace mirror (set empty for default endpoint) |
 | `CHUNK_SIZE` | `512` | Max characters per chunk |
 | `CHUNK_OVERLAP` | `64` | Overlap between chunks |
-| `TOP_K` | `5` | Number of results to retrieve |
+| `TOP_K` | `10` | Max results to retrieve (acts as cap) |
+| `SCORE_THRESHOLD` | `0.5` | Cosine distance threshold — results above this are discarded (lower = stricter) |
+| `KNOWLEDGE_DIR` env var | `knowledge_base/` | Override knowledge base path at runtime |
 
 Set `EMBEDDING_MODEL = "local"` to use ChromaDB's built-in ONNX model (faster startup, English-optimized).
 
@@ -92,11 +104,11 @@ python -m pytest tests/ -v
 
 ```
 ├── main.py              # CLI: index / query / prompt
-├── config.py            # Settings
+├── config.py            # Settings (env vars, model, chunking, threshold)
 ├── embedder.py          # Embedding (transformers or ChromaDB ONNX fallback)
 ├── loader.py            # Document loading (.txt, .md, .xlsx)
-├── chunker.py           # Text chunking
-├── vector_store.py      # ChromaDB persistence & search
+├── chunker.py           # Text chunking (Q&A boundary aware)
+├── vector_store.py      # ChromaDB persistence & search (with score threshold)
 ├── retriever.py         # Result formatting
 ├── knowledge_base/      # Place your documents here
 ├── chroma_db/           # Vector index (auto-created)
@@ -107,3 +119,12 @@ python -m pytest tests/ -v
     ├── test_retriever.py
     └── test_vector_store.py
 ```
+
+## Notes
+
+- **Q&A documents**: The chunker automatically detects `问:` / `Q:`-prefixed paragraphs
+  and keeps each Q&A pair as its own chunk, preventing unrelated pairs from being
+  merged together.
+- **Relevance filtering**: Results are filtered by cosine distance threshold — results
+  above `SCORE_THRESHOLD` are discarded, so you get only relevant context, not a
+  fixed count of results.
