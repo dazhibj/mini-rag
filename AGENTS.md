@@ -15,6 +15,7 @@ python -m coverage run -m pytest tests/ && python -m coverage report -m
 - **Embedder**: local fallback (ChromaDB ONNX all-MiniLM-L6-v2) or transformers model
 - **Vector store**: ChromaDB with cosine similarity
 - **Loader**: supports `.txt`, `.md`, `.xlsx` via `knowledge_base/`
+- **Knowledge dir**: overridable via `KNOWLEDGE_DIR` env var (default: `knowledge_base/`)
 
 ## Config (config.py)
 - Model: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (multilingual/Chinese)

@@ -3,6 +3,10 @@ from __future__ import annotations
 import re
 
 
+def _is_qa_boundary(para: str) -> bool:
+    return bool(re.match(r"^(问|Q|q)[：:]", para.strip()))
+
+
 def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]:
     paragraphs = re.split(r"\n\s*\n", text.strip())
     chunks: list[str] = []
@@ -12,6 +16,12 @@ def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]
     for para in paragraphs:
         para = para.strip()
         if not para:
+            continue
+
+        if _is_qa_boundary(para) and buffer:
+            chunks.append(buffer)
+            buffer = para
+            prev_tail = para
             continue
 
         if len(buffer) + len(para) + 1 <= chunk_size:

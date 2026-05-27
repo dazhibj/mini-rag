@@ -1,7 +1,8 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
-KNOWLEDGE_DIR = BASE_DIR / "knowledge_base"
+KNOWLEDGE_DIR = Path(os.environ.get("KNOWLEDGE_DIR", BASE_DIR / "knowledge_base"))
 CHROMA_DIR = BASE_DIR / "chroma_db"
 
 EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
