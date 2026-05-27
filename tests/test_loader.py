@@ -25,6 +25,23 @@ class TestLoadTextFile:
         result = load_excel_file(f)
         assert result is None
 
+    def test_load_excel_success(self, tmp_path: Path):
+        import openpyxl
+        f = tmp_path / "test.xlsx"
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Sheet1"
+        ws.append(["Name", "Age"])
+        ws.append(["Alice", 30])
+        wb.save(f)
+        wb.close()
+
+        result = load_excel_file(f)
+        assert result is not None
+        assert "Sheet1" in result
+        assert "Name" in result
+        assert "Alice" in result
+
 
 class TestLoadDocuments:
     def test_load_txt(self, tmp_path: Path):
