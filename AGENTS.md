@@ -20,7 +20,7 @@ python -m coverage run -m pytest tests/ && python -m coverage report -m
 ## Config (config.py)
 - Model: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (multilingual/Chinese)
 - Mirror: `https://hf-mirror.com` (China-friendly HuggingFace mirror)
-- Chunk: size=512, overlap=64, top_k=5
+ - Chunk: size=512, overlap=64, top_k=10, threshold=0.5
 
 ## Repository
 - GitHub: `git@github.com:dazhibj/mini-rag.git` (public, MIT license)
