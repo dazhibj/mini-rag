@@ -35,6 +35,7 @@ python -m coverage run -m pytest tests/ && python -m coverage report -m
 
 ## TODO
 - **Extend chunker**: add support for custom delimiters/methods beyond current Q&A boundary detection (e.g., markdown headers, code blocks, regex-based splits)
+- **Excel Q&A loader**: detect Q&A columns in `.xlsx` files (e.g., "question" and "answer" headers), format each row as `问: ...\n答: ...` so the existing Q&A split can process them
 
 ## Conventions
 - No comments in code (opencode style preference)
