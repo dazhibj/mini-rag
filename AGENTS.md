@@ -33,6 +33,9 @@ python -m coverage run -m pytest tests/ && python -m coverage report -m
 - Multilingual MiniLM (1.1GB) works via hf-mirror.com
 - Python 3.12, CPU-only torch
 
+## TODO
+- **Extend chunker**: add support for custom delimiters/methods beyond current Q&A boundary detection (e.g., markdown headers, code blocks, regex-based splits)
+
 ## Conventions
 - No comments in code (opencode style preference)
 - Minimal output, concise responses
