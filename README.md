@@ -122,9 +122,12 @@ python -m pytest tests/ -v
 
 ## Notes
 
-- **Q&A documents**: The chunker automatically detects `问:` / `Q:`-prefixed paragraphs
+- **Q&A chunking**: The chunker automatically detects `问:` / `Q:`-prefixed paragraphs
   and keeps each Q&A pair as its own chunk, preventing unrelated pairs from being
   merged together.
+- **Q&A embedding**: At index time, each Q&A pair is split — only the question is
+  embedded as the vector (for better query match), while the answer is stored in
+  metadata. Both question and answer are shown in search results.
 - **Relevance filtering**: Results are filtered by cosine distance threshold — results
   above `SCORE_THRESHOLD` are discarded, so you get only relevant context, not a
   fixed count of results.

@@ -6,21 +6,21 @@ source .venv/bin/activate
 python main.py index         # build vector index from knowledge_base/
 python main.py query "..."   # search and print results
 python main.py prompt "..."  # generate a complete RAG prompt for an LLM
-python -m pytest tests/ -v   # run tests (35 tests, coverage ~95%)
+python -m pytest tests/ -v   # run tests (49 tests, coverage ~96%)
 python -m coverage run -m pytest tests/ && python -m coverage report -m
 ```
 
 ## Key Design
-- **Chunker**: paragraph-boundary splitting + character-based chunk_size/overlap
+- **Chunker**: paragraph-boundary splitting + character-based chunk_size/overlap + Q&A pair detection
 - **Embedder**: local fallback (ChromaDB ONNX all-MiniLM-L6-v2) or transformers model
-- **Vector store**: ChromaDB with cosine similarity
+- **Vector store**: ChromaDB with cosine similarity; Q&A chunks embed only the question, store answer in metadata
 - **Loader**: supports `.txt`, `.md`, `.xlsx` via `knowledge_base/`
 - **Knowledge dir**: overridable via `KNOWLEDGE_DIR` env var (default: `knowledge_base/`)
 
 ## Config (config.py)
 - Model: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (multilingual/Chinese)
 - Mirror: `https://hf-mirror.com` (China-friendly HuggingFace mirror)
- - Chunk: size=512, overlap=64, top_k=10, threshold=0.5
+ - Chunk: size=512, overlap=64, top_k=10, threshold=0.55
 
 ## Repository
 - GitHub: `git@github.com:dazhibj/mini-rag.git` (public, MIT license)
