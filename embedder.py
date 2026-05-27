@@ -8,16 +8,23 @@ class Embedder:
         self.model_name = model_name
         self._tokenizer = None
         self._model = None
-
-        if hf_endpoint:
-            os.environ["HF_ENDPOINT"] = hf_endpoint
+        self._fallback = None
 
         if model_name == "local":
             return
 
+        if hf_endpoint:
+            os.environ.setdefault("HF_ENDPOINT", hf_endpoint)
+
         import torch
         self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._load_model(model_name)
+
+    def _get_fallback(self):
+        if self._fallback is None:
+            from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
+            self._fallback = DefaultEmbeddingFunction()
+        return self._fallback
 
     def _load_model(self, name: str):
         from transformers import AutoModel, AutoTokenizer
@@ -31,8 +38,7 @@ class Embedder:
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         if self._model is None:
-            from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
-            return DefaultEmbeddingFunction()(texts)
+            return self._get_fallback()(texts)
 
         import torch
         import torch.nn.functional as F
@@ -51,6 +57,5 @@ class Embedder:
     @property
     def dimension(self) -> int:
         if self._model is None:
-            from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
-            return len(DefaultEmbeddingFunction()([""])[0])
+            return len(self._get_fallback()([""])[0])
         return self._model.config.hidden_size

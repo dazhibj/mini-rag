@@ -22,6 +22,9 @@ class TestVectorStore:
         local_store.add_documents([])
         assert local_store.count == 0
 
+    def test_search_empty_collection(self, local_store):
+        assert local_store.search("anything") == []
+
     def test_search_returns_results(self, local_store, sample_chunks):
         local_store.add_documents(sample_chunks)
         results = local_store.search("文档", top_k=5)

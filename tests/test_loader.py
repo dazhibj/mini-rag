@@ -19,6 +19,12 @@ class TestLoadTextFile:
     def test_nonexistent_file(self, tmp_path: Path):
         assert load_text_file(tmp_path / "nope.txt") is None
 
+    def test_corrupted_excel_returns_none(self, tmp_path: Path):
+        f = tmp_path / "bad.xlsx"
+        f.write_text("not an excel file")
+        result = load_excel_file(f)
+        assert result is None
+
 
 class TestLoadDocuments:
     def test_load_txt(self, tmp_path: Path):

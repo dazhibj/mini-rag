@@ -7,6 +7,7 @@ def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]
     paragraphs = re.split(r"\n\s*\n", text.strip())
     chunks: list[str] = []
     buffer = ""
+    prev_tail = ""
 
     for para in paragraphs:
         para = para.strip()
@@ -23,7 +24,9 @@ def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]
                     chunks.append(para[i : i + chunk_size])
                 buffer = ""
             else:
-                buffer = para
+                prefix = prev_tail[-overlap:] if overlap > 0 and prev_tail else ""
+                buffer = (prefix + para) if prefix else para
+        prev_tail = para
 
     if buffer:
         chunks.append(buffer)

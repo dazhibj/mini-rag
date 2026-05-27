@@ -42,10 +42,13 @@ class VectorStore:
         )
 
     def search(self, query: str, top_k: int = 5) -> list[dict]:
+        if self.count == 0:
+            return []
+
         query_emb = self.embedder.embed_query(query)
         results = self.collection.query(
             query_embeddings=[query_emb],
-            n_results=top_k,
+            n_results=min(top_k, self.count),
         )
         output: list[dict] = []
         for i in range(len(results["ids"][0])):

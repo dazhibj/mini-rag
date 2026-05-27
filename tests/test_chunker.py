@@ -25,11 +25,19 @@ class TestChunkText:
         result = chunk_text(long_para, chunk_size=15, overlap=0)
         assert len(result) > 1
 
-    def test_overlap(self):
+    def test_overlap_within_long_paragraph(self):
         text = "abcdefghijklmnopqrstuvwxyz"
         result = chunk_text(text, chunk_size=10, overlap=5)
         if len(result) > 1:
             assert result[0][-5:] == result[1][:5]
+
+    def test_overlap_between_paragraph_chunks(self):
+        paras = "\n\n".join(["A" * 50, "B" * 50, "C" * 50])
+        result = chunk_text(paras, chunk_size=60, overlap=10)
+        if len(result) > 1:
+            tail = result[0][-10:]
+            head = result[1][:10]
+            assert tail == head, f"overlap failed: {tail!r} != {head!r}"
 
 
 class TestChunkDocuments:

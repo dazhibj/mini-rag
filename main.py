@@ -10,6 +10,7 @@ from config import (
     CHUNK_OVERLAP,
     CHUNK_SIZE,
     COLLECTION_NAME,
+    DISPLAY_MAX_CHARS,
     EMBEDDING_MODEL,
     HF_ENDPOINT,
     KNOWLEDGE_DIR,
@@ -19,6 +20,19 @@ from embedder import Embedder
 from loader import load_documents
 from retriever import format_results, print_results
 from vector_store import VectorStore
+
+_embedder_cache: dict[str, Embedder] = {}
+
+
+def _get_embedder() -> Embedder:
+    key = f"{EMBEDDING_MODEL}::{HF_ENDPOINT}"
+    if key not in _embedder_cache:
+        _embedder_cache[key] = Embedder(EMBEDDING_MODEL, HF_ENDPOINT)
+    return _embedder_cache[key]
+
+
+def _get_store() -> VectorStore:
+    return VectorStore(CHROMA_DIR, COLLECTION_NAME, _get_embedder())
 
 
 def cmd_index():
@@ -31,24 +45,21 @@ def cmd_index():
     print(f"Created {len(chunks)} chunks.")
 
     print(f"Loading embedding model ({EMBEDDING_MODEL}) ...")
-    embedder = Embedder(EMBEDDING_MODEL, HF_ENDPOINT)
+    store = _get_store()
 
     print("Indexing into ChromaDB ...")
-    store = VectorStore(CHROMA_DIR, COLLECTION_NAME, embedder)
     store.add_documents(chunks)
     print(f"Done. Total vectors: {store.count}")
 
 
 def cmd_query(query: str):
-    embedder = Embedder(EMBEDDING_MODEL, HF_ENDPOINT)
-    store = VectorStore(CHROMA_DIR, COLLECTION_NAME, embedder)
+    store = _get_store()
     results = store.search(query, top_k=TOP_K)
-    print_results(format_results(results))
+    print_results(format_results(results), max_chars=DISPLAY_MAX_CHARS)
 
 
 def cmd_prompt(query: str):
-    embedder = Embedder(EMBEDDING_MODEL, HF_ENDPOINT)
-    store = VectorStore(CHROMA_DIR, COLLECTION_NAME, embedder)
+    store = _get_store()
     results = store.search(query, top_k=TOP_K)
     items = format_results(results)
 

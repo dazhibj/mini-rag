@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Generator
+from typing import Callable, Generator
 
 import openpyxl
 
@@ -12,8 +12,12 @@ def load_text_file(path: Path) -> str | None:
         return None
 
 
-def load_excel_file(path: Path) -> str:
-    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+def load_excel_file(path: Path) -> str | None:
+    try:
+        wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    except Exception as e:
+        print(f"Error reading {path}: {e}")
+        return None
     parts: list[str] = []
     for sheet_name in wb.sheetnames:
         ws = wb[sheet_name]
@@ -26,7 +30,7 @@ def load_excel_file(path: Path) -> str:
     return "\n\n".join(parts)
 
 
-SUPPORTED_EXTS: dict[str, callable] = {
+SUPPORTED_EXTS: dict[str, Callable[[Path], str | None]] = {
     ".txt": load_text_file,
     ".md": load_text_file,
     ".xlsx": load_excel_file,

@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from config import DISPLAY_MAX_CHARS
+
 
 @dataclass
 class SearchResult:
@@ -23,7 +25,7 @@ def format_results(results: list[dict]) -> list[SearchResult]:
     ]
 
 
-def print_results(results: list[SearchResult]) -> None:
+def print_results(results: list[SearchResult], max_chars: int = DISPLAY_MAX_CHARS) -> None:
     if not results:
         print("No results found.")
         return
@@ -32,5 +34,5 @@ def print_results(results: list[SearchResult]) -> None:
         print(f"Result {i}  (score: {r.score:.4f})")
         print(f"Source: {r.filename}  chunk #{r.chunk_index}")
         print(f"{'-'*60}")
-        print(r.content[:500])
+        print(r.content[:max_chars])
         print()
