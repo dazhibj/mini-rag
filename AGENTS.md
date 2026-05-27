@@ -11,7 +11,7 @@ python -m coverage run -m pytest tests/ && python -m coverage report -m
 ```
 
 ## Key Design
-- **Chunker**: paragraph-boundary splitting + character-based chunk_size/overlap + Q&A pair detection
+- **Chunker**: paragraph-boundary splitting + character-based chunk_size/overlap + configurable boundary patterns (Q&A, markdown headers, etc.)
 - **Embedder**: local fallback (ChromaDB ONNX all-MiniLM-L6-v2) or transformers model
 - **Vector store**: ChromaDB with cosine similarity; Q&A chunks embed only the question, store answer in metadata
 - **Loader**: supports `.txt`, `.md`, `.xlsx` via `knowledge_base/`
@@ -20,7 +20,8 @@ python -m coverage run -m pytest tests/ && python -m coverage report -m
 ## Config (config.py)
 - Model: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (multilingual/Chinese)
 - Mirror: `https://hf-mirror.com` (China-friendly HuggingFace mirror)
- - Chunk: size=512, overlap=64, top_k=10, threshold=0.55
+- Chunk: size=512, overlap=64, top_k=10, threshold=0.55
+- Boundary patterns: regex list in `config.py` (default: Q&A detection)
 
 ## Repository
 - GitHub: `git@github.com:dazhibj/mini-rag.git` (public, MIT license)
@@ -34,7 +35,7 @@ python -m coverage run -m pytest tests/ && python -m coverage report -m
 - Python 3.12, CPU-only torch
 
 ## TODO
-- **Extend chunker**: add support for custom delimiters/methods beyond current Q&A boundary detection (e.g., markdown headers, code blocks, regex-based splits)
+- **Add more boundary patterns**: extend `BOUNDARY_PATTERNS` list with common delimiters (e.g., code blocks, blockquotes)
 - **Excel Q&A loader**: detect Q&A columns in `.xlsx` files (e.g., "question" and "answer" headers), format each row as `问: ...\n答: ...` so the existing Q&A split can process them
 
 ## Conventions

@@ -79,7 +79,8 @@ Edit `config.py`:
 | `CHUNK_SIZE` | `512` | Max characters per chunk |
 | `CHUNK_OVERLAP` | `64` | Overlap between chunks |
 | `TOP_K` | `10` | Max results to retrieve (acts as cap) |
-| `SCORE_THRESHOLD` | `0.5` | Cosine distance threshold — results above this are discarded (lower = stricter) |
+| `SCORE_THRESHOLD` | `0.55` | Cosine distance threshold — results above this are discarded (lower = stricter) |
+| `BOUNDARY_PATTERNS` | `[r"^(问\|Q\|q)[：:]"]` | Regex patterns that force a new chunk (e.g., for markdown headers) |
 | `KNOWLEDGE_DIR` env var | `knowledge_base/` | Override knowledge base path at runtime |
 
 Set `EMBEDDING_MODEL = "local"` to use ChromaDB's built-in ONNX model (faster startup, English-optimized).
