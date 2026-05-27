@@ -42,3 +42,4 @@ python -m coverage run -m pytest tests/ && python -m coverage report -m
 - No comments in code (opencode style preference)
 - Minimal output, concise responses
 - Tests before committing
+- Update README.md and AGENTS.md in the same commit as the code change, not as a follow-up
