@@ -3,11 +3,31 @@ from __future__ import annotations
 import re
 
 
+_DEFAULT_BOUNDARY = re.compile(r"^(问|Q|q)[：:]")
+
+
 def _is_qa_boundary(para: str) -> bool:
-    return bool(re.match(r"^(问|Q|q)[：:]", para.strip()))
+    return bool(_DEFAULT_BOUNDARY.match(para.strip()))
 
 
-def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]:
+def _compile_boundaries(patterns: list[str]) -> list[re.Pattern]:
+    return [re.compile(p) for p in patterns]
+
+
+def chunk_text(
+    text: str,
+    chunk_size: int = 512,
+    overlap: int = 64,
+    boundary_patterns: list[str] | None = None,
+) -> list[str]:
+    if boundary_patterns:
+        _checks = _compile_boundaries(boundary_patterns)
+
+        def _is_boundary(para: str) -> bool:
+            return any(p.match(para.strip()) for p in _checks)
+    else:
+        _is_boundary = _is_qa_boundary
+
     paragraphs = re.split(r"\n\s*\n", text.strip())
     chunks: list[str] = []
     buffer = ""
@@ -18,7 +38,7 @@ def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[str]
         if not para:
             continue
 
-        if _is_qa_boundary(para) and buffer:
+        if _is_boundary(para) and buffer:
             chunks.append(buffer)
             buffer = para
             prev_tail = para
@@ -48,10 +68,11 @@ def chunk_documents(
     documents: list[tuple[str, str, str]],
     chunk_size: int = 512,
     overlap: int = 64,
+    boundary_patterns: list[str] | None = None,
 ) -> list[tuple[str, str, str, int]]:
     result: list[tuple[str, str, str, int]] = []
     for filename, ext, content in documents:
-        chunks = chunk_text(content, chunk_size, overlap)
+        chunks = chunk_text(content, chunk_size, overlap, boundary_patterns)
         for i, chunk in enumerate(chunks):
             result.append((filename, ext, chunk, i))
     return result

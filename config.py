@@ -13,3 +13,7 @@ COLLECTION_NAME = "documents"
 TOP_K = 10
 SCORE_THRESHOLD = 0.55
 DISPLAY_MAX_CHARS = 500
+
+BOUNDARY_PATTERNS = [
+    r"^(问|Q|q)[：:]",
+]

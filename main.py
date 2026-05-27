@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from chunker import chunk_documents
 from config import (
+    BOUNDARY_PATTERNS,
     CHROMA_DIR,
     CHUNK_OVERLAP,
     CHUNK_SIZE,
@@ -42,7 +43,8 @@ def cmd_index():
     print(f"Found {len(docs)} documents.")
 
     print("Chunking ...")
-    chunks = chunk_documents(docs, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP)
+    chunks = chunk_documents(docs, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP,
+                             boundary_patterns=BOUNDARY_PATTERNS)
     print(f"Created {len(chunks)} chunks.")
 
     print(f"Loading embedding model ({EMBEDDING_MODEL}) ...")

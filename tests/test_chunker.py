@@ -62,6 +62,13 @@ class TestChunkText:
         assert _is_qa_boundary("普通段落") is False
         assert _is_qa_boundary("") is False
 
+    def test_custom_boundary_pattern(self):
+        text = "intro\n\n## Section 1\ncontent one\n\n## Section 2\ncontent two"
+        result = chunk_text(text, chunk_size=500, boundary_patterns=[r"^#{1,6}\s"])
+        assert len(result) >= 2
+        assert "## Section 1" in result[1]
+        assert "## Section 2" in result[2]
+
 
 class TestChunkDocuments:
     def test_empty(self):
