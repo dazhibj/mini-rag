@@ -14,6 +14,7 @@ from config import (
     EMBEDDING_MODEL,
     HF_ENDPOINT,
     KNOWLEDGE_DIR,
+    SCORE_THRESHOLD,
     TOP_K,
 )
 from embedder import Embedder
@@ -54,13 +55,13 @@ def cmd_index():
 
 def cmd_query(query: str):
     store = _get_store()
-    results = store.search(query, top_k=TOP_K)
+    results = store.search(query, top_k=TOP_K, threshold=SCORE_THRESHOLD)
     print_results(format_results(results), max_chars=DISPLAY_MAX_CHARS)
 
 
 def cmd_prompt(query: str):
     store = _get_store()
-    results = store.search(query, top_k=TOP_K)
+    results = store.search(query, top_k=TOP_K, threshold=SCORE_THRESHOLD)
     items = format_results(results)
 
     if not items:
@@ -70,7 +71,7 @@ def cmd_prompt(query: str):
     print("请你基于以下参考资料回答用户的问题。\n")
     print("参考资料：")
     for i, item in enumerate(items, 1):
-        print(f"[{i}] ({item.filename})")
+        print(f"[{i}] ({item.filename}) score={item.score:.4f}")
         print(item.content)
         print()
     print("用户问题：" + query)

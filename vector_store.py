@@ -41,7 +41,7 @@ class VectorStore:
             metadatas=metadatas,
         )
 
-    def search(self, query: str, top_k: int = 5) -> list[dict]:
+    def search(self, query: str, top_k: int = 10, threshold: float | None = None) -> list[dict]:
         if self.count == 0:
             return []
 
@@ -52,11 +52,14 @@ class VectorStore:
         )
         output: list[dict] = []
         for i in range(len(results["ids"][0])):
+            dist = results["distances"][0][i] if results.get("distances") else None
+            if threshold is not None and dist is not None and dist > threshold:
+                break
             output.append({
                 "id": results["ids"][0][i],
                 "document": results["documents"][0][i] if results.get("documents") else None,
                 "metadata": results["metadatas"][0][i],
-                "distance": results["distances"][0][i] if results.get("distances") else None,
+                "distance": dist,
             })
         return output
 

@@ -46,6 +46,17 @@ class TestVectorStore:
         assert r["metadata"]["filename"] == "doc1.txt"
         assert r["metadata"]["chunk_index"] in (0, 1)
 
+    def test_search_threshold_filters_distant_results(self, local_store, sample_chunks):
+        local_store.add_documents(sample_chunks)
+        all_results = local_store.search("文档", top_k=10)
+        filtered = local_store.search("文档", top_k=10, threshold=0.0)
+        assert len(filtered) <= len(all_results)
+
+    def test_search_threshold_none_returns_all(self, local_store, sample_chunks):
+        local_store.add_documents(sample_chunks)
+        results = local_store.search("文档", top_k=10, threshold=None)
+        assert len(results) > 0
+
     def test_persistence(self, chroma_tmp_dir, sample_chunks):
         embedder = Embedder("local")
         store1 = VectorStore(chroma_tmp_dir, "persist_test", embedder)
